@@ -66,7 +66,11 @@
                     </div>
                     <div class="form-group">
                         <label>Valor (R$)</label>
-                        <input type="number" step="0.01" name="amount" placeholder="0,00" class="form-control" required>
+                        <input type="number" step="0.01" min="0.01" name="amount" placeholder="0,00" class="form-control" required>
+                        <small style="display: block; margin-top: 6px; color: #b91c1c; font-size: 12px;">Não é possível inserir um valor negativo.</small>
+                        @error('amount')
+                            <small style="display: block; margin-top: 6px; color: #b91c1c;">{{ $message }}</small>
+                        @enderror
                     </div>
                     <div class="form-group">
                         <label>Tipo</label>
