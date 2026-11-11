@@ -35,8 +35,14 @@
     <div class="container">
         
         <div class="header">
-            <h1>📊 FinanControl Pro</h1>
-            <p style="color: #6b7280; font-size: 14px;">Hoje: {{ date('d/m/Y') }}</p>
+            <div>
+                <h1>📊 FinanControl Pro</h1>
+                <p style="color: #6b7280; font-size: 14px;">Hoje: {{ date('d/m/Y') }}</p>
+            </div>
+            <form action="{{ route('logout') }}" method="POST" style="margin:0;">
+                @csrf
+                <button type="submit" style="background:#dc2626;color:white;border:0;padding:10px 16px;border-radius:7px;font-weight:bold;cursor:pointer;">Sair da conta</button>
+            </form>
         </div>
 
         <div class="cards-grid">
