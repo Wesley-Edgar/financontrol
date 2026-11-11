@@ -7,16 +7,18 @@ use Illuminate\Http\Request;
 
 class TransactionController extends Controller
 {
-    // Listar transações e gerar o gráfico
+    // Mostra somente as movimentações do usuário autenticado.
     public function index()
     {
-        $transactions = Transaction::latest()->get();
-        
-        $incomes = Transaction::where('type', 'income')->sum('amount');
-        $expenses = Transaction::where('type', 'expense')->sum('amount');
+        $userId = auth()->id();
+        $transactions = Transaction::where('user_id', $userId)->latest()->get();
+
+        $incomes = Transaction::where('user_id', $userId)->where('type', 'income')->sum('amount');
+        $expenses = Transaction::where('user_id', $userId)->where('type', 'expense')->sum('amount');
         $balance = $incomes - $expenses;
 
-        $chartData = Transaction::where('type', 'expense')
+        $chartData = Transaction::where('user_id', $userId)
+            ->where('type', 'expense')
             ->selectRaw('category, SUM(amount) as total')
             ->groupBy('category')
             ->get();
@@ -24,25 +26,27 @@ class TransactionController extends Controller
         return view('index', compact('transactions', 'balance', 'incomes', 'expenses', 'chartData'));
     }
 
-    // Salvar nova transação
+    // Valida e salva uma movimentação diretamente na conta atual.
     public function store(Request $request)
     {
-        $request->validate([
+        $data = $request->validate([
             'description' => 'required|string|max:255',
             'amount' => 'required|numeric|min:0.01',
             'type' => 'required|in:income,expense',
-            'category' => 'required|string',
+            'category' => 'required|string|max:100',
         ]);
 
-        Transaction::create($request->all());
+        $request->user()->transactions()->create($data);
 
-        return redirect()->route('transactions.index')->with('success', 'Adicionado!');
+        return redirect()->route('transactions.index')->with('success', 'Movimentação adicionada!');
     }
 
-    // Excluir transação
-    public function destroy(Transaction $transaction)
+    // A consulta já exige o ID do usuário: ninguém exclui dados de outra conta.
+    public function destroy(int $transaction)
     {
-        $transaction->delete();
-        return redirect()->route('transactions.index')->with('success', 'Removido!');
+        $item = auth()->user()->transactions()->findOrFail($transaction);
+        $item->delete();
+
+        return redirect()->route('transactions.index')->with('success', 'Movimentação removida!');
     }
 }
