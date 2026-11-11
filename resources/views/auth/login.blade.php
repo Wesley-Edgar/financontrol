@@ -2,68 +2,37 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Entrar | FinanControl</title>
     <style>
-        * { box-sizing: border-box; }
-        body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 24px; font-family: 'Segoe UI', Arial, sans-serif; background: linear-gradient(135deg, #0f172a, #172554); color: #1f2937; }
-        .login-card { width: 100%; max-width: 430px; background: #fff; padding: 38px; border-radius: 18px; box-shadow: 0 24px 60px rgba(0,0,0,.25); }
-        .brand { text-align: center; margin-bottom: 30px; }
-        .brand-mark { display: inline-grid; place-items: center; width: 54px; height: 54px; border-radius: 15px; background: #2563eb; color: white; font-size: 25px; margin-bottom: 12px; }
-        h1 { margin: 0; color: #111827; font-size: 25px; }
-        .subtitle { margin: 8px 0 0; color: #6b7280; font-size: 14px; }
-        .form-group { margin-bottom: 18px; }
-        label { display: block; margin-bottom: 7px; font-size: 13px; font-weight: 650; color: #374151; }
-        input { width: 100%; padding: 13px 14px; border: 1px solid #d1d5db; border-radius: 9px; font-size: 15px; outline: none; transition: border .2s, box-shadow .2s; }
-        input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,.12); }
-        .btn { width: 100%; border: 0; border-radius: 9px; padding: 14px; background: #2563eb; color: white; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 5px; }
-        .btn:hover { background: #1d4ed8; }
-        .helper { margin-top: 22px; text-align: center; color: #6b7280; font-size: 12px; }
-        .error { color: #b91c1c; font-size: 12px; margin-top: 6px; }
-        @media (max-width: 480px) { .login-card { padding: 28px 22px; } }
+        *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:#f1f5f9;font-family:Segoe UI,Arial,sans-serif;color:#172033}
+        .box{width:min(420px,92vw);background:#fff;padding:34px;border-radius:18px;box-shadow:0 15px 45px #0f172a18}
+        h1{margin:0 0 8px;color:#14532d}.muted{color:#64748b;margin:0 0 25px}
+        label{display:block;font-weight:600;font-size:13px;margin:16px 0 7px}
+        input{width:100%;padding:13px;border:1px solid #cbd5e1;border-radius:9px;font-size:15px}
+        button{width:100%;margin-top:22px;padding:14px;border:0;border-radius:9px;background:#15803d;color:#fff;font-weight:700;font-size:15px;cursor:pointer}
+        a{color:#15803d;font-weight:600;text-decoration:none}.foot{text-align:center;margin-top:22px;font-size:14px}
+        .alert{padding:11px;border-radius:8px;background:#fef2f2;color:#b91c1c;margin:12px 0;font-size:13px}
+        .success{background:#f0fdf4;color:#166534}
     </style>
 </head>
 <body>
-    <main class="login-card">
-        <header class="brand">
-            <div class="brand-mark">₣</div>
-            <h1>FinanControl</h1>
-            <p class="subtitle">Acesse sua área de controle financeiro</p>
-        </header>
-
-        <!-- Formulário visual de acesso. A autenticação será conectada ao backend na próxima etapa. -->
-        <form>
-            @csrf
-            <div class="form-group">
-                <label for="cpf">CPF</label>
-                <input id="cpf" name="cpf" type="text" placeholder="000.000.000-00" maxlength="14" autocomplete="username" required>
-            </div>
-
-            <div class="form-group">
-                <label for="birth_date">Data de nascimento</label>
-                <input id="birth_date" name="birth_date" type="date" autocomplete="bday" required>
-            </div>
-
-            <div class="form-group">
-                <label for="password">Senha</label>
-                <input id="password" name="password" type="password" placeholder="Digite sua senha" autocomplete="current-password" required>
-            </div>
-
-            <button class="btn" type="submit">Entrar</button>
-        </form>
-
-        <p class="helper">Seus dados financeiros merecem segurança.</p>
-    </main>
-
-    <script>
-        // Aplica a máscara visual do CPF enquanto o usuário digita.
-        document.getElementById('cpf').addEventListener('input', function (event) {
-            let cpf = event.target.value.replace(/\D/g, '').slice(0, 11);
-            cpf = cpf.replace(/(\d{3})(\d)/, '$1.$2');
-            cpf = cpf.replace(/(\d{3})(\d)/, '$1.$2');
-            cpf = cpf.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-            event.target.value = cpf;
-        });
-    </script>
+<div class="box">
+    <h1>FinanControl</h1>
+    <p class="muted">Entre na sua conta para acessar suas finanças.</p>
+    @if(session('success'))<div class="alert success">{{ session('success') }}</div>@endif
+    @if($errors->any())<div class="alert">{{ $errors->first() }}</div>@endif
+    <form method="POST" action="{{ route('login.submit') }}">
+        @csrf
+        <label for="cpf">CPF</label>
+        <input id="cpf" name="cpf" value="{{ old('cpf') }}" inputmode="numeric" autocomplete="username" placeholder="000.000.000-00" required>
+        <label for="birth_date">Data de nascimento</label>
+        <input id="birth_date" type="date" name="birth_date" required>
+        <label for="password">Senha de 6 dígitos</label>
+        <input id="password" type="password" name="password" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="current-password" placeholder="••••••" required>
+        <button type="submit">Entrar na conta</button>
+    </form>
+    <div class="foot">Ainda não tem conta? <a href="{{ route('register') }}">Criar uma conta</a></div>
+</div>
 </body>
 </html>
